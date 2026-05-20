@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
@@ -33,21 +35,24 @@ jobs:
       - name: Build Debug APK
         run: gradle assembleDebug --no-daemon
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: PiBrainChat-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 30
+      - name: Rename APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk PiBrainChat.apk
 
-      - name: Publish public download link
+      - name: Delete existing release if any
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release delete latest-debug --yes --repo physicistmanoj/PiBrainChat || true
+
+      - name: Create GitHub Release with APK
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          APK=app/build/outputs/apk/debug/app-debug.apk
-          echo "Uploading to file.io..."
-          RESPONSE=$(curl -s -F "file=@${APK}" https://file.io/?expires=7d)
-          echo "file.io response: $RESPONSE"
-          URL=$(echo $RESPONSE | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('link','FAILED'))")
+          gh release create latest-debug PiBrainChat.apk \
+            --title "PiBrainChat — Latest Debug APK" \
+            --notes "Claude + Gemini in one Android shell. Install directly on your phone." \
+            --repo physicistmanoj/PiBrainChat
           echo ""
           echo "========================================"
-          echo "APK DIRECT DOWNLOAD: $URL"
+          echo "APK DOWNLOAD:"
+          echo "https://github.com/physicistmanoj/PiBrainChat/releases/download/latest-debug/PiBrainChat.apk"
           echo "========================================"
