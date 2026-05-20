@@ -43,9 +43,11 @@ jobs:
       - name: Publish public download link
         run: |
           APK=app/build/outputs/apk/debug/app-debug.apk
-          echo "Uploading APK to transfer.sh..."
-          URL=$(curl -s --upload-file "$APK" https://transfer.sh/PiBrainChat.apk)
+          echo "Uploading to file.io..."
+          RESPONSE=$(curl -s -F "file=@${APK}" https://file.io/?expires=7d)
+          echo "file.io response: $RESPONSE"
+          URL=$(echo $RESPONSE | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('link','FAILED'))")
           echo ""
           echo "========================================"
-          echo "APK DOWNLOAD URL: $URL"
+          echo "APK DIRECT DOWNLOAD: $URL"
           echo "========================================"
