@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_primary">
+
+    <LinearLayout
+        android:id="@+id/tabBar"
+        android:layout_width="0dp"
+        android:layout_height="52dp"
+        android:orientation="horizontal"
+        android:background="@color/bg_surface"
+        android:elevation="4dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp">
+            <TextView android:id="@+id/tabClaude" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CLAUDE" android:textSize="11sp" android:fontFamily="monospace" android:letterSpacing="0.12" android:textColor="@color/tab_active" android:paddingBottom="6dp" />
+            <View android:id="@+id/indicatorClaude" android:layout_width="24dp" android:layout_height="2dp" android:background="@color/accent_claude" android:visibility="visible" />
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp">
+            <TextView android:id="@+id/tabGemini" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="GEMINI" android:textSize="11sp" android:fontFamily="monospace" android:letterSpacing="0.12" android:textColor="@color/tab_inactive" android:paddingBottom="6dp" />
+            <View android:id="@+id/indicatorGemini" android:layout_width="24dp" android:layout_height="2dp" android:background="@color/accent_gemini" android:visibility="invisible" />
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp">
+            <TextView android:id="@+id/tabRelay" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="RELAY" android:textSize="11sp" android:fontFamily="monospace" android:letterSpacing="0.08" android:textColor="@color/tab_inactive" android:paddingBottom="6dp" />
+            <View android:id="@+id/indicatorRelay" android:layout_width="24dp" android:layout_height="2dp" android:background="@color/accent_relay" android:visibility="invisible" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ProgressBar android:id="@+id/progressBar" style="?android:attr/progressBarStyleHorizontal" android:layout_width="0dp" android:layout_height="2dp" android:progressTint="@color/accent_claude" android:background="@color/bg_surface" android:max="100" android:visibility="gone" app:layout_constraintTop_toBottomOf="@id/tabBar" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" />
+
+    <WebView android:id="@+id/webviewClaude" android:layout_width="0dp" android:layout_height="0dp" android:visibility="visible" app:layout_constraintTop_toBottomOf="@id/progressBar" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" />
+
+    <WebView android:id="@+id/webviewGemini" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:layout_constraintTop_toBottomOf="@id/progressBar" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" />
+
+    <ScrollView android:id="@+id/relayPanel" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" android:background="@color/bg_primary" app:layout_constraintTop_toBottomOf="@id/progressBar" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="RELAY CHANNEL" android:textColor="@color/text_dim" android:textSize="10sp" android:fontFamily="monospace" android:letterSpacing="0.2" android:paddingBottom="12dp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="12dp">
+                <Button android:id="@+id/btnFromClaude" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:layout_marginEnd="6dp" android:text="From Claude" android:textSize="11sp" android:fontFamily="monospace" android:backgroundTint="@color/accent_claude" android:textColor="@color/text_primary" />
+                <Button android:id="@+id/btnFromGemini" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:layout_marginStart="6dp" android:text="From Gemini" android:textSize="11sp" android:fontFamily="monospace" android:backgroundTint="@color/accent_gemini" android:textColor="@color/text_primary" />
+            </LinearLayout>
+            <EditText android:id="@+id/relayInput" android:layout_width="match_parent" android:layout_height="180dp" android:gravity="top|start" android:padding="12dp" android:hint="Relay text..." android:hintTextColor="@color/text_dim" android:textColor="@color/text_primary" android:textSize="13sp" android:fontFamily="monospace" android:background="@drawable/bg_input" android:inputType="textMultiLine" android:layout_marginBottom="12dp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="16dp">
+                <Button android:id="@+id/btnSendToClaude" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:layout_marginEnd="6dp" android:text="To Claude" android:textSize="11sp" android:fontFamily="monospace" android:backgroundTint="@color/accent_claude" android:textColor="@color/text_primary" />
+                <Button android:id="@+id/btnSendToGemini" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:layout_marginStart="6dp" android:text="To Gemini" android:textSize="11sp" android:fontFamily="monospace" android:backgroundTint="@color/accent_gemini" android:textColor="@color/text_primary" />
+            </LinearLayout>
+            <Button android:id="@+id/btnClearRelay" android:layout_width="match_parent" android:layout_height="36dp" android:text="CLEAR" android:textSize="10sp" android:fontFamily="monospace" android:backgroundTint="@color/bg_surface" android:textColor="@color/text_dim" android:layout_marginBottom="24dp" />
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/bg_surface" android:layout_marginBottom="16dp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SCRATCH PAD" android:textColor="@color/text_dim" android:textSize="10sp" android:fontFamily="monospace" android:letterSpacing="0.2" android:paddingBottom="8dp" />
+            <EditText android:id="@+id/notepadInput" android:layout_width="match_parent" android:layout_height="120dp" android:gravity="top|start" android:padding="12dp" android:hint="Notes, formulas..." android:hintTextColor="@color/text_dim" android:textColor="@color/accent_relay" android:textSize="13sp" android:fontFamily="monospace" android:background="@drawable/bg_input" android:inputType="textMultiLine" android:imeOptions="actionDone" />
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

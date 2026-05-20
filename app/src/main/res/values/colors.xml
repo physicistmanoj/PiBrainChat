@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_primary">#0A0A0F</color>
+    <color name="bg_surface">#13131A</color>
+    <color name="text_primary">#E8E8F0</color>
+    <color name="text_dim">#4A4A6A</color>
+    <color name="accent_claude">#CC5200</color>
+    <color name="accent_gemini">#1A7A4A</color>
+    <color name="accent_relay">#4A7ACC</color>
+    <color name="tab_active">#E8E8F0</color>
+    <color name="tab_inactive">#4A4A6A</color>
+</resources>
