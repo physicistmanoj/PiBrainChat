@@ -7,7 +7,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Bundle
 import android.os.Message
 import android.view.KeyEvent
@@ -27,14 +26,21 @@ class MainActivity : AppCompatActivity() {
 
     enum class Tab { CLAUDE, GEMINI, RELAY }
 
+    // Pixel 7 Chrome UA — must NOT contain "wv" (WebView marker)
+    // claude.ai checks for "wv" in the UA and blocks it
     private val chromeUA =
-        "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 " +
-        "(KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36"
+        "Mozilla/5.0 (Linux; Android 13; Pixel 7 Build/TQ3A.230901.001) " +
+        "AppleWebKit/537.36 (KHTML, like Gecko) " +
+        "Chrome/121.0.6167.144 Mobile Safari/537.36"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Global cookie manager setup
+        val cookieManager = CookieManager.getInstance()
+        cookieManager.setAcceptCookie(true)
 
         requestPermissions()
         setupWebViews()
@@ -60,21 +66,37 @@ class MainActivity : AppCompatActivity() {
                 setSupportMultipleWindows(true)
                 javaScriptCanOpenWindowsAutomatically = true
                 mediaPlaybackRequiresUserGesture = false
+
+                // Critical: strip "wv" from user agent
+                // Default WebView UA contains " wv" which sites use to detect and block WebViews
                 userAgentString = chromeUA
+
                 loadWithOverviewMode = true
                 useWideViewPort = true
                 setSupportZoom(true)
                 builtInZoomControls = false
                 displayZoomControls = false
+
+                // Allow mixed content (needed for some auth flows)
+                mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+
+                // Disable safe browsing — it can interfere with auth redirects
+                safeBrowsingEnabled = false
+
+                // Cache
                 cacheMode = WebSettings.LOAD_DEFAULT
-                mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
             }
+
             wv.webViewClient = PiBrainWebViewClient()
             wv.webChromeClient = PiBrainChromeClient(wv)
-            CookieManager.getInstance().apply {
-                setAcceptCookie(true)
-                setAcceptThirdPartyCookies(wv, true)
-            }
+
+            // Accept third-party cookies (required for OAuth)
+            CookieManager.getInstance().setAcceptThirdPartyCookies(wv, true)
+
+            // Remove WebView-specific headers that leak identity
+            wv.removeJavascriptInterface("searchBoxJavaBridge_")
+            wv.removeJavascriptInterface("accessibility")
+            wv.removeJavascriptInterface("accessibilityTraversal")
         }
     }
 
@@ -103,18 +125,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupRelayPanel() {
         binding.btnFromClaude.setOnClickListener {
-            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = clipboard.primaryClip
-            if (clip != null && clip.itemCount > 0) {
+            val cb = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = cb.primaryClip
+            if (clip != null && clip.itemCount > 0)
                 binding.relayInput.setText(clip.getItemAt(0).coerceToText(this).toString())
-            } else toast("Copy text from Claude first")
+            else toast("Copy text from Claude first")
         }
         binding.btnFromGemini.setOnClickListener {
-            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = clipboard.primaryClip
-            if (clip != null && clip.itemCount > 0) {
+            val cb = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = cb.primaryClip
+            if (clip != null && clip.itemCount > 0)
                 binding.relayInput.setText(clip.getItemAt(0).coerceToText(this).toString())
-            } else toast("Copy text from Gemini first")
+            else toast("Copy text from Gemini first")
         }
         binding.btnSendToClaude.setOnClickListener {
             val text = binding.relayInput.text.toString().trim()
@@ -128,7 +150,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupNotepad() {
-        binding.notepadInput.setOnEditorActionListener { _, actionId, event ->
+        binding.notepadInput.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 copyToClipboard(binding.notepadInput.text.toString())
                 toast("Copied")
@@ -155,28 +177,63 @@ class MainActivity : AppCompatActivity() {
 
     private fun requestPermissions() {
         val perms = arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
-        val missing = perms.filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
+        val missing = perms.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
         if (missing.isNotEmpty()) ActivityCompat.requestPermissions(this, missing.toTypedArray(), 100)
     }
 
     inner class PiBrainWebViewClient : WebViewClient() {
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest) = false
-        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) { binding.progressBar.visibility = View.VISIBLE }
-        override fun onPageFinished(view: WebView?, url: String?) { binding.progressBar.visibility = View.GONE; CookieManager.getInstance().flush() }
-        override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) { binding.progressBar.visibility = View.GONE }
+
+        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+            binding.progressBar.visibility = View.VISIBLE
+        }
+
+        override fun onPageFinished(view: WebView?, url: String?) {
+            binding.progressBar.visibility = View.GONE
+            CookieManager.getInstance().flush()
+        }
+
+        override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
+            binding.progressBar.visibility = View.GONE
+        }
+
+        override fun onReceivedHttpError(
+            view: WebView?,
+            request: WebResourceRequest?,
+            errorResponse: WebResourceResponse?
+        ) {
+            // Let the page handle its own HTTP errors
+        }
     }
 
     inner class PiBrainChromeClient(private val parentWebView: WebView) : WebChromeClient() {
-        override fun onCreateWindow(view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message?): Boolean {
+        override fun onCreateWindow(
+            view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message?
+        ): Boolean {
+            // Handle OAuth popup windows (Google login, etc.)
             val newWebView = WebView(this@MainActivity)
-            newWebView.webViewClient = PiBrainWebViewClient()
             newWebView.settings.javaScriptEnabled = true
+            newWebView.settings.domStorageEnabled = true
             newWebView.settings.userAgentString = chromeUA
-            (resultMsg?.obj as? WebView.WebViewTransport)?.webView = newWebView
+            newWebView.settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            newWebView.webViewClient = PiBrainWebViewClient()
+            CookieManager.getInstance().setAcceptThirdPartyCookies(newWebView, true)
+            val transport = resultMsg?.obj as? WebView.WebViewTransport
+            transport?.webView = newWebView
             resultMsg?.sendToTarget()
             return true
         }
-        override fun onPermissionRequest(request: PermissionRequest?) { request?.grant(request.resources) }
-        override fun onProgressChanged(view: WebView?, newProgress: Int) { binding.progressBar.progress = newProgress }
+
+        override fun onPermissionRequest(request: PermissionRequest?) {
+            request?.grant(request.resources)
+        }
+
+        override fun onProgressChanged(view: WebView?, newProgress: Int) {
+            binding.progressBar.progress = newProgress
+            binding.progressBar.visibility =
+                if (newProgress < 100) View.VISIBLE else View.GONE
+        }
     }
 }
