@@ -28,8 +28,8 @@
         </LinearLayout>
 
         <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:paddingTop="4dp">
-            <TextView android:id="@+id/tabRelay" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="RELAY" android:textSize="11sp" android:fontFamily="monospace" android:letterSpacing="0.08" android:textColor="@color/tab_inactive" android:paddingBottom="6dp" />
-            <View android:id="@+id/indicatorRelay" android:layout_width="24dp" android:layout_height="2dp" android:background="@color/accent_relay" android:visibility="invisible" />
+            <TextView android:id="@+id/tabPibrain" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="PIBRAIN" android:textSize="11sp" android:fontFamily="monospace" android:letterSpacing="0.08" android:textColor="@color/tab_inactive" android:paddingBottom="6dp" />
+            <View android:id="@+id/indicatorPibrain" android:layout_width="24dp" android:layout_height="2dp" android:background="@color/accent_relay" android:visibility="invisible" />
         </LinearLayout>
     </LinearLayout>
 
@@ -39,32 +39,16 @@
 
     <WebView android:id="@+id/webviewGemini" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:layout_constraintTop_toBottomOf="@id/progressBar" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" />
 
-    <ScrollView android:id="@+id/relayPanel" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" android:background="@color/bg_primary" app:layout_constraintTop_toBottomOf="@id/progressBar" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent">
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+    <LinearLayout android:id="@+id/pibrainPanel" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" android:orientation="vertical" android:background="@color/bg_primary" app:layout_constraintTop_toBottomOf="@id/progressBar" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent">
+        
+        <ScrollView android:id="@+id/chatScroll" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:padding="12dp">
+            <TextView android:id="@+id/chatHistory" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/text_primary" android:textSize="14sp" android:fontFamily="monospace" />
+        </ScrollView>
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="RELAY CHANNEL" android:textColor="@color/text_dim" android:textSize="10sp" android:fontFamily="monospace" android:letterSpacing="0.2" android:paddingBottom="12dp" />
-
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="12dp">
-                <Button android:id="@+id/btnFromClaude" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:layout_marginEnd="6dp" android:text="From Claude" android:textSize="11sp" android:fontFamily="monospace" android:backgroundTint="@color/accent_claude" android:textColor="@color/text_primary" />
-                <Button android:id="@+id/btnFromGemini" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:layout_marginStart="6dp" android:text="From Gemini" android:textSize="11sp" android:fontFamily="monospace" android:backgroundTint="@color/accent_gemini" android:textColor="@color/text_primary" />
-            </LinearLayout>
-
-            <EditText android:id="@+id/relayInput" android:layout_width="match_parent" android:layout_height="180dp" android:gravity="top|start" android:padding="12dp" android:hint="Relay text..." android:textColorHint="@color/text_dim" android:textColor="@color/text_primary" android:textSize="13sp" android:fontFamily="monospace" android:background="@drawable/bg_input" android:inputType="textMultiLine" android:layout_marginBottom="12dp" />
-
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="16dp">
-                <Button android:id="@+id/btnSendToClaude" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:layout_marginEnd="6dp" android:text="To Claude" android:textSize="11sp" android:fontFamily="monospace" android:backgroundTint="@color/accent_claude" android:textColor="@color/text_primary" />
-                <Button android:id="@+id/btnSendToGemini" android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1" android:layout_marginStart="6dp" android:text="To Gemini" android:textSize="11sp" android:fontFamily="monospace" android:backgroundTint="@color/accent_gemini" android:textColor="@color/text_primary" />
-            </LinearLayout>
-
-            <Button android:id="@+id/btnClearRelay" android:layout_width="match_parent" android:layout_height="36dp" android:text="CLEAR" android:textSize="10sp" android:fontFamily="monospace" android:backgroundTint="@color/bg_surface" android:textColor="@color/text_dim" android:layout_marginBottom="24dp" />
-
-            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/bg_surface" android:layout_marginBottom="16dp" />
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SCRATCH PAD" android:textColor="@color/text_dim" android:textSize="10sp" android:fontFamily="monospace" android:letterSpacing="0.2" android:paddingBottom="8dp" />
-
-            <EditText android:id="@+id/notepadInput" android:layout_width="match_parent" android:layout_height="120dp" android:gravity="top|start" android:padding="12dp" android:hint="Notes, formulas..." android:textColorHint="@color/text_dim" android:textColor="@color/accent_relay" android:textSize="13sp" android:fontFamily="monospace" android:background="@drawable/bg_input" android:inputType="textMultiLine" android:imeOptions="actionDone" />
-
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="8dp" android:background="@color/bg_surface" android:gravity="center_vertical">
+            <EditText android:id="@+id/chatInput" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:hint="Message PiBrain..." android:textColorHint="@color/text_dim" android:textColor="@color/text_primary" android:textSize="14sp" android:fontFamily="monospace" android:background="@drawable/bg_input" android:padding="12dp" android:maxLines="4" />
+            <Button android:id="@+id/btnSendChat" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SEND" android:layout_marginStart="8dp" android:backgroundTint="@color/accent_relay" android:textColor="@color/text_primary" />
         </LinearLayout>
-    </ScrollView>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
