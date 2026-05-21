@@ -144,6 +144,7 @@ class MainActivity : AppCompatActivity() {
         val prefs = getSharedPrefs()
         if (prefs.getString("github_pat", null) == null) {
             val input = EditText(this)
+            input.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
             AlertDialog.Builder(this)
                 .setTitle("GitHub PAT Required")
                 .setView(input)
