@@ -1,58 +1,19 @@
 name: Build APK
 
+# RECOVERY FREEZE - 2026-06-07
+# This workflow previously ran on pushes to main and recreated the latest-debug APK release.
+# It is intentionally disabled during PiBrain recovery to prevent release churn while repos are reconciled.
+# Re-enable only through the recovery control queue with a specific owner, reason, and rollback plan.
+
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  build:
+  frozen:
+    if: false # RECOVERY_FREEZE_2026_06_07
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android build tools
-        run: sdkmanager "build-tools;34.0.0" "platforms;android-34"
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '8.2'
-
-      - name: Build Debug APK
-        run: gradle assembleDebug --no-daemon
-
-      - name: Rename APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk PiBrainChat.apk
-
-      - name: Delete existing release if any
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release delete latest-debug --yes --repo physicistmanoj/PiBrainChat || true
-
-      - name: Create GitHub Release with APK
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create latest-debug PiBrainChat.apk \
-            --title "PiBrainChat — Latest Debug APK" \
-            --notes "Claude + Gemini in one Android shell. Install directly on your phone." \
-            --repo physicistmanoj/PiBrainChat
-          echo ""
-          echo "========================================"
-          echo "APK DOWNLOAD:"
-          echo "https://github.com/physicistmanoj/PiBrainChat/releases/download/latest-debug/PiBrainChat.apk"
-          echo "========================================"
+      - run: echo "PiBrainChat APK build/release is frozen during PiBrain recovery."
